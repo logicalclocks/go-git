@@ -64,6 +64,8 @@ type CloneOptions struct {
 	InsecureSkipTLS bool
 	// CABundle specify additional ca bundle with system cert pool
 	CABundle []byte
+	//Path
+	ClonePath string
 }
 
 // Validate validates the fields and sets the default values.

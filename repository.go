@@ -835,6 +835,34 @@ func (r *Repository) clone(ctx context.Context, o *CloneOptions) error {
 		return err
 	}
 
+	//Default branches with less than 5 characters have corrupted HEAD on hopsfs-mount
+	if o.ClonePath != "" {
+		repoHead, err := stdioutil.ReadFile(o.ClonePath + "/.git/HEAD")
+		if err == nil {
+			repoHeadStr := string(repoHead)
+			fmt.Printf("Repo head str is %s", repoHeadStr)
+			if repoHeadStr != "" {
+				strArray := strings.Split(repoHeadStr, "\n")
+				if len(strArray) > 1 {
+					finalRepoHeadStr := strings.TrimSpace(strArray[0])
+					fmt.Printf("Correct repo head str is %s", finalRepoHeadStr)
+					err := os.Remove(o.ClonePath + "/.git/HEAD")
+					if err != nil {
+						fmt.Printf("Failed to delete old head %s", err)
+					}
+					err2 := stdioutil.WriteFile(o.ClonePath + "/.git/HEAD", []byte(finalRepoHeadStr), 0644)
+					if err2 != nil {
+						fmt.Printf("Failed to write head to a file %s", err)
+					} else {
+						fmt.Print("Rewrote a the HEAD!")
+						reRead2, _ := stdioutil.ReadFile(o.ClonePath + "/.git/HEAD")
+						fmt.Printf("Rewrote Repo head str is %s", string(reRead2))
+					}
+				}
+			}
+		}
+	}
+
 	if r.wt != nil && !o.NoCheckout {
 		w, err := r.Worktree()
 		if err != nil {
