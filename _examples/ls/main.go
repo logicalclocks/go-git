@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/emirpasic/gods/trees/binaryheap"
+
 	"github.com/logicalclocks/go-git/v5"
 	. "github.com/logicalclocks/go-git/v5/_examples"
 	"github.com/logicalclocks/go-git/v5/plumbing"

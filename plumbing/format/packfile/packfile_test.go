@@ -5,6 +5,7 @@ import (
 	"math"
 
 	fixtures "github.com/go-git/go-git-fixtures/v4"
+
 	"github.com/logicalclocks/go-git/v5/plumbing"
 	"github.com/logicalclocks/go-git/v5/plumbing/format/idxfile"
 	"github.com/logicalclocks/go-git/v5/plumbing/format/packfile"

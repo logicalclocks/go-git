@@ -2,5 +2,6 @@ coverage.out
 *~
 coverage.txt
 profile.out
-.idea/
 .tmp/
+
+.idea/

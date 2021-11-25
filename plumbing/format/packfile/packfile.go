@@ -7,6 +7,7 @@ import (
 	"os"
 
 	billy "github.com/go-git/go-billy/v5"
+
 	"github.com/logicalclocks/go-git/v5/plumbing"
 	"github.com/logicalclocks/go-git/v5/plumbing/cache"
 	"github.com/logicalclocks/go-git/v5/plumbing/format/idxfile"
