@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/go-git/go-git/v5"
-	. "github.com/go-git/go-git/v5/_examples"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	. "github.com/logicalclocks/go-git/v5/_examples"
+	"github.com/logicalclocks/go-git/v5/plumbing/object"
 )
 
 // Open an existing repository in a specific folder.

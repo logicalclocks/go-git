@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/go-git/go-git/v5"
-	. "github.com/go-git/go-git/v5/_examples"
+	. "github.com/logicalclocks/go-git/v5/_examples"
 )
 
 // Pull changes from a remote repository
