@@ -5,10 +5,10 @@ import (
 	"math"
 
 	fixtures "github.com/go-git/go-git-fixtures/v4"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/format/idxfile"
-	"github.com/go-git/go-git/v5/plumbing/format/packfile"
-	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/logicalclocks/go-git/v5/plumbing"
+	"github.com/logicalclocks/go-git/v5/plumbing/format/idxfile"
+	"github.com/logicalclocks/go-git/v5/plumbing/format/packfile"
+	"github.com/logicalclocks/go-git/v5/plumbing/storer"
 	. "gopkg.in/check.v1"
 )
 
