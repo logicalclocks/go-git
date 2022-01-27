@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-git/go-git/v5"
+	"github.com/logicalclocks/go-git/v5"
 	. "github.com/logicalclocks/go-git/v5/_examples"
 	"github.com/logicalclocks/go-git/v5/plumbing/object"
 	"github.com/logicalclocks/go-git/v5/storage/memory"

@@ -8,7 +8,7 @@ import (
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-billy/v5/util"
 	fixtures "github.com/go-git/go-git-fixtures/v4"
-	"github.com/go-git/go-git/v5"
+	"github.com/logicalclocks/go-git/v5"
 	"github.com/logicalclocks/go-git/v5/plumbing"
 	"github.com/logicalclocks/go-git/v5/plumbing/format/packfile"
 	"github.com/logicalclocks/go-git/v5/plumbing/storer"
