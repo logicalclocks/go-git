@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-git/go-git/v5"
+	"github.com/logicalclocks/go-git/v5"
 	. "github.com/logicalclocks/go-git/v5/_examples"
 	"github.com/logicalclocks/go-git/v5/plumbing/transport/client"
 	githttp "github.com/logicalclocks/go-git/v5/plumbing/transport/http"

@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/go-git/go-git/v5"
+	"github.com/logicalclocks/go-git/v5"
 	. "github.com/logicalclocks/go-git/v5/_examples"
 )
 
