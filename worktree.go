@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/logicalclocks/go-git/v5/config"
 	"github.com/logicalclocks/go-git/v5/plumbing"
@@ -20,6 +19,7 @@ import (
 	"github.com/logicalclocks/go-git/v5/plumbing/storer"
 	"github.com/logicalclocks/go-git/v5/utils/ioutil"
 	"github.com/logicalclocks/go-git/v5/utils/merkletrie"
+	"github.com/logicalclocks/go-git/v5/utils/sync"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
@@ -533,13 +533,6 @@ func (w *Worktree) checkoutChangeRegularFile(name string,
 	return nil
 }
 
-var copyBufferPool = sync.Pool{
-	New: func() interface{} {
-		b := make([]byte, 32*1024)
-		return &b
-	},
-}
-
 func (w *Worktree) checkoutFile(f *object.File) (err error) {
 	mode, err := f.Mode.ToOSFileMode()
 	if err != nil {
@@ -563,10 +556,9 @@ func (w *Worktree) checkoutFile(f *object.File) (err error) {
 	}
 
 	defer ioutil.CheckClose(to, &err)
-	bufp := copyBufferPool.Get().(*[]byte)
-	buf := *bufp
-	_, err = io.CopyBuffer(to, from, buf)
-	copyBufferPool.Put(bufp)
+	buf := sync.GetByteSlice()
+	_, err = io.CopyBuffer(to, from, *buf)
+	sync.PutByteSlice(buf)
 	return
 }
 
