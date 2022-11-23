@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/logicalclocks/go-git/v5/config"
 	"github.com/logicalclocks/go-git/v5/plumbing"
@@ -20,6 +19,7 @@ import (
 	"github.com/logicalclocks/go-git/v5/plumbing/storer"
 	"github.com/logicalclocks/go-git/v5/utils/ioutil"
 	"github.com/logicalclocks/go-git/v5/utils/merkletrie"
+	"github.com/logicalclocks/go-git/v5/utils/sync"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
@@ -183,6 +183,10 @@ func (w *Worktree) Checkout(opts *CheckoutOptions) error {
 		return err
 	}
 
+	if len(opts.SparseCheckoutDirectories) > 0 {
+		return w.ResetSparsely(ro, opts.SparseCheckoutDirectories)
+	}
+
 	return w.Reset(ro)
 }
 func (w *Worktree) createBranch(opts *CheckoutOptions) error {
@@ -263,8 +267,7 @@ func (w *Worktree) setHEADToBranch(branch plumbing.ReferenceName, commit plumbin
 	return w.r.Storer.SetReference(head)
 }
 
-// Reset the worktree to a specified state.
-func (w *Worktree) Reset(opts *ResetOptions) error {
+func (w *Worktree) ResetSparsely(opts *ResetOptions, dirs []string) error {
 	if err := opts.Validate(w.r); err != nil {
 		return err
 	}
@@ -294,7 +297,7 @@ func (w *Worktree) Reset(opts *ResetOptions) error {
 	}
 
 	if opts.Mode == MixedReset || opts.Mode == MergeReset || opts.Mode == HardReset {
-		if err := w.resetIndex(t); err != nil {
+		if err := w.resetIndex(t, dirs); err != nil {
 			return err
 		}
 	}
@@ -308,8 +311,17 @@ func (w *Worktree) Reset(opts *ResetOptions) error {
 	return nil
 }
 
-func (w *Worktree) resetIndex(t *object.Tree) error {
+// Reset the worktree to a specified state.
+func (w *Worktree) Reset(opts *ResetOptions) error {
+	return w.ResetSparsely(opts, nil)
+}
+
+func (w *Worktree) resetIndex(t *object.Tree, dirs []string) error {
 	idx, err := w.r.Storer.Index()
+	if len(dirs) > 0 {
+		idx.SkipUnless(dirs)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -521,12 +533,6 @@ func (w *Worktree) checkoutChangeRegularFile(name string,
 	return nil
 }
 
-var copyBufferPool = sync.Pool{
-	New: func() interface{} {
-		return make([]byte, 32*1024)
-	},
-}
-
 func (w *Worktree) checkoutFile(f *object.File) (err error) {
 	mode, err := f.Mode.ToOSFileMode()
 	if err != nil {
@@ -550,9 +556,9 @@ func (w *Worktree) checkoutFile(f *object.File) (err error) {
 	}
 
 	defer ioutil.CheckClose(to, &err)
-	buf := copyBufferPool.Get().([]byte)
-	_, err = io.CopyBuffer(to, from, buf)
-	copyBufferPool.Put(buf)
+	buf := sync.GetByteSlice()
+	_, err = io.CopyBuffer(to, from, *buf)
+	sync.PutByteSlice(buf)
 	return
 }
 

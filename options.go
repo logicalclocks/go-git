@@ -220,7 +220,7 @@ type PushOptions struct {
 	// Force allows the push to update a remote branch even when the local
 	// branch does not descend from it.
 	Force bool
-	// InsecureSkipTLS skips ssl verify if protocal is https
+	// InsecureSkipTLS skips ssl verify if protocol is https
 	InsecureSkipTLS bool
 	// CABundle specify additional ca bundle with system cert pool
 	CABundle []byte
@@ -230,8 +230,25 @@ type PushOptions struct {
 	// FollowTags will send any annotated tags with a commit target reachable from
 	// the refs already being pushed
 	FollowTags bool
+	// ForceWithLease allows a force push as long as the remote ref adheres to a "lease"
+	ForceWithLease *ForceWithLease
 	// PushOptions sets options to be transferred to the server during push.
 	Options map[string]string
+	// Atomic sets option to be an atomic push
+	Atomic bool
+}
+
+// ForceWithLease sets fields on the lease
+// If neither RefName nor Hash are set, ForceWithLease protects
+// all refs in the refspec by ensuring the ref of the remote in the local repsitory
+// matches the one in the ref advertisement.
+type ForceWithLease struct {
+	// RefName, when set will protect the ref by ensuring it matches the
+	// hash in the ref advertisement.
+	RefName plumbing.ReferenceName
+	// Hash is the expected object id of RefName. The push will be rejected unless this
+	// matches the corresponding object id of RefName in the refs advertisement.
+	Hash plumbing.Hash
 }
 
 // Validate validates the fields and sets the default values.
@@ -293,6 +310,8 @@ type CheckoutOptions struct {
 	// target branch. Force and Keep are mutually exclusive, should not be both
 	// set to true.
 	Keep bool
+	// SparseCheckoutDirectories
+	SparseCheckoutDirectories []string
 }
 
 // Validate validates the fields and sets the default values.
@@ -385,7 +404,7 @@ type LogOptions struct {
 
 	// Show only those commits in which the specified file was inserted/updated.
 	// It is equivalent to running `git log -- <file-name>`.
-	// this field is kept for compatility, it can be replaced with PathFilter
+	// this field is kept for compatibility, it can be replaced with PathFilter
 	FileName *string
 
 	// Filter commits based on the path of files that are updated
@@ -590,7 +609,7 @@ func (o *CreateTagOptions) loadConfigTagger(r *Repository) error {
 type ListOptions struct {
 	// Auth credentials, if required, to use with the remote repository.
 	Auth transport.AuthMethod
-	// InsecureSkipTLS skips ssl verify if protocal is https
+	// InsecureSkipTLS skips ssl verify if protocol is https
 	InsecureSkipTLS bool
 	// CABundle specify additional ca bundle with system cert pool
 	CABundle []byte

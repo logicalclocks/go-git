@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/logicalclocks/go-git/v5"
+
 	. "github.com/logicalclocks/go-git/v5/_examples"
 )
 

@@ -59,7 +59,7 @@ func NewReferenceUpdateRequestFromCapabilities(adv *capability.List) *ReferenceU
 	r := NewReferenceUpdateRequest()
 
 	if adv.Supports(capability.Agent) {
-		r.Capabilities.Set(capability.Agent, capability.DefaultAgent)
+		r.Capabilities.Set(capability.Agent, capability.DefaultAgent())
 	}
 
 	if adv.Supports(capability.ReportStatus) {
@@ -87,9 +87,9 @@ type Action string
 
 const (
 	Create  Action = "create"
-	Update         = "update"
-	Delete         = "delete"
-	Invalid        = "invalid"
+	Update  Action = "update"
+	Delete  Action = "delete"
+	Invalid Action = "invalid"
 )
 
 type Command struct {

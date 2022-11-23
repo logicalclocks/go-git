@@ -2,17 +2,18 @@ package packfile
 
 import (
 	"bytes"
-	"compress/zlib"
 	"fmt"
 	"io"
 	"os"
 
 	billy "github.com/go-git/go-billy/v5"
+
 	"github.com/logicalclocks/go-git/v5/plumbing"
 	"github.com/logicalclocks/go-git/v5/plumbing/cache"
 	"github.com/logicalclocks/go-git/v5/plumbing/format/idxfile"
 	"github.com/logicalclocks/go-git/v5/plumbing/storer"
 	"github.com/logicalclocks/go-git/v5/utils/ioutil"
+	"github.com/logicalclocks/go-git/v5/utils/sync"
 )
 
 var (
@@ -138,9 +139,8 @@ func (p *Packfile) getObjectSize(h *ObjectHeader) (int64, error) {
 	case plumbing.CommitObject, plumbing.TreeObject, plumbing.BlobObject, plumbing.TagObject:
 		return h.Length, nil
 	case plumbing.REFDeltaObject, plumbing.OFSDeltaObject:
-		buf := bufPool.Get().(*bytes.Buffer)
-		defer bufPool.Put(buf)
-		buf.Reset()
+		buf := sync.GetBytesBuffer()
+		defer sync.PutBytesBuffer(buf)
 
 		if _, _, err := p.s.NextObject(buf); err != nil {
 			return 0, err
@@ -227,9 +227,9 @@ func (p *Packfile) getNextObject(h *ObjectHeader, hash plumbing.Hash) (plumbing.
 		// For delta objects we read the delta data and apply the small object
 		// optimization only if the expanded version of the object still meets
 		// the small object threshold condition.
-		buf := bufPool.Get().(*bytes.Buffer)
-		defer bufPool.Put(buf)
-		buf.Reset()
+		buf := sync.GetBytesBuffer()
+		defer sync.PutBytesBuffer(buf)
+
 		if _, _, err := p.s.NextObject(buf); err != nil {
 			return nil, err
 		}
@@ -290,14 +290,13 @@ func (p *Packfile) getObjectContent(offset int64) (io.ReadCloser, error) {
 
 func asyncReader(p *Packfile) (io.ReadCloser, error) {
 	reader := ioutil.NewReaderUsingReaderAt(p.file, p.s.r.offset)
-	zr := zlibReaderPool.Get().(io.ReadCloser)
-
-	if err := zr.(zlib.Resetter).Reset(reader, nil); err != nil {
+	zr, err := sync.GetZlibReader(reader)
+	if err != nil {
 		return nil, fmt.Errorf("zlib reset error: %s", err)
 	}
 
-	return ioutil.NewReadCloserWithCloser(zr, func() error {
-		zlibReaderPool.Put(zr)
+	return ioutil.NewReadCloserWithCloser(zr.Reader, func() error {
+		sync.PutZlibReader(zr)
 		return nil
 	}), nil
 
@@ -373,9 +372,9 @@ func (p *Packfile) fillRegularObjectContent(obj plumbing.EncodedObject) (err err
 }
 
 func (p *Packfile) fillREFDeltaObjectContent(obj plumbing.EncodedObject, ref plumbing.Hash) error {
-	buf := bufPool.Get().(*bytes.Buffer)
-	defer bufPool.Put(buf)
-	buf.Reset()
+	buf := sync.GetBytesBuffer()
+	defer sync.PutBytesBuffer(buf)
+
 	_, _, err := p.s.NextObject(buf)
 	if err != nil {
 		return err
@@ -417,9 +416,9 @@ func (p *Packfile) fillREFDeltaObjectContentWithBuffer(obj plumbing.EncodedObjec
 }
 
 func (p *Packfile) fillOFSDeltaObjectContent(obj plumbing.EncodedObject, offset int64) error {
-	buf := bufPool.Get().(*bytes.Buffer)
-	defer bufPool.Put(buf)
-	buf.Reset()
+	buf := sync.GetBytesBuffer()
+	defer sync.PutBytesBuffer(buf)
+
 	_, _, err := p.s.NextObject(buf)
 	if err != nil {
 		return err
